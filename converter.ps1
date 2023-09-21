@@ -1,7 +1,5 @@
-param([string]$InputPath=".\TEST1.pack",
-      [string]$OutputPath1=".\Extracted",
-      [string]$OutputPath2=".\Decoded",
-      [string]$Duration='30')
+param([string]$InputPath="default",
+      [string]$Duration='0')
     
 function Length-to-seconds{
     param ( [string]$Length )
@@ -17,15 +15,26 @@ try
 {
     Add-Type -AssemblyName 'System.Windows.Forms'
 
-    Write-Host 'Select directory with files to decompress';
-
-    $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
-    if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) 
+    if($InputPath -eq "default")
     {
-        $InputPath = $dialog.SelectedPath
-        Write-Host "Directory selected is $InputPath"
-    }
+        $cpath = $pwd;
+        if($Duration -eq '0')
+        {
+            $cpath = [System.Environment]::CurrentDirectory
+        }
+        Write-Host 'Select directory with files to decompress';
 
+        $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+        if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) 
+        {
+            $InputPath = $dialog.SelectedPath
+            Write-Host "Directory selected is $InputPath"
+        }
+    }
+    else
+    {
+        $cpath = $pwd;
+    }
     $Files = Get-ChildItem $InputPath
     ForEach ($File in $Files)
     {
@@ -34,7 +43,7 @@ try
         {
             try 
             {
-                .\QBMS\quickbms.exe -F "*.wav" -K ".\wavescan.bms" "$($InputPath)\$($File)" $OutputPath1
+                .\QBMS\quickbms.exe -F "*.wav" -K ".\wavescan.bms" "$($InputPath)\$($File)" ".\Extracted"
             }
             catch 
             {
@@ -43,32 +52,32 @@ try
         }
     }
 
-    if (-Not (Test-Path $OutputPath2)) 
+    if (-Not (Test-Path ".\Decoded")) 
     {
         New-Item -Path ".\" -Name "Decoded" -ItemType Directory
     }
 
-    $ExtractedFiles =  Get-ChildItem $OutputPath1
+
+    $ExtractedFiles =  Get-ChildItem ".\Extracted"
+    $path = "$($cpath)\Decoded\$($ExtractedFiles[0])"
+    $shell = New-Object -COMObject Shell.Application
+    $folder = Split-Path $path
+    $shellfolder = $shell.Namespace($folder)
     ForEach ($File in $ExtractedFiles)
     {
-        #TODO: add bit rate flag
-        .\VGMSTREAM\vgmstream-cli.exe "$($OutputPath1)\$($File)" -o "$($OutputPath2)\$($File)"
-        $cpath = [System.Environment]::CurrentDirectory
+        .\VGMSTREAM\vgmstream-cli.exe ".\Extracted\$($File)" -o ".\Decoded\$($File)"
         $path = "$($cpath)\Decoded\$($File)"
-        $shell = New-Object -COMObject Shell.Application
-        $folder = Split-Path $path
         $file = Split-Path $path -Leaf
-        $shellfolder = $shell.Namespace($folder)
         $shellfile = $shellfolder.ParseName($file)
         $Time = $shellfolder.GetDetailsOf($shellfile, 27); #Windows 10
         $Seconds = Length-to-seconds -Length $Time
         if ($Seconds -lt $Duration)
         {
-            Remove-Item -path "$($OutputPath2)\$($File)"
+            Remove-Item -path ".\Decoded\$($File)"
         }
     }
-    Write-Host "$($OutputPath2)\$($File)"
-    Remove-Item -path $OutputPath1 -recurse
+    Write-Host ".\Decoded\$($File)"
+    Remove-Item -path ".\Extracted" -recurse
 
 }
 catch 
