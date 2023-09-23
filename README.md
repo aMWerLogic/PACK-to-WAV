@@ -1,6 +1,6 @@
 # PACK-to-WAV
 Combination of free tools for .pack files extraction and decoding into wav audio format.
-Works best (if you are lucky enough) with game files.
+Works best (if you are lucky enough) with game files. **Windows 10/11**
 
 You can run script from context menu or by CLI.
 1. Context menu: open Pack-to-WAV directory, then right click on converter.ps1 and select "Run with PowerShell" option. When the script starts running, select .pack files to extract. Extracted and decoded files are located in 'Decoded' dir.
@@ -16,7 +16,7 @@ CLI parameters:
 
 Whole process can take long time and it depends on how big the .pack file is. A 1GB .pack file can contain several thousands of compressed files, so be prepared. Also thats why i added 'Duration' parameter, so you could filter/remove very small junk files (unless they are what you are looking for).
 
-After the script has finished, you should see directory named 'Decoded'. Your files are inside. Now you can check if they are properly working and their quality. I recommend you a tool named "Spek". It allows you to draw spectogram of your audio.
+After the script has finished, you should see directory named 'Decoded'. Your files are inside. Now you can check their quality and if they are properly working. I recommend you a tool named "Spek". It allows you to draw spectogram of your audio.
 
 ![Spek](spectrum.jpg)
 
