@@ -14,14 +14,9 @@ function Length-to-seconds{
 try
 {
     Add-Type -AssemblyName 'System.Windows.Forms'
-
+    $cpath = $pwd;
     if($InputPath -eq "default")
     {
-        $cpath = $pwd;
-        if($Duration -eq '0')
-        {
-            $cpath = [System.Environment]::CurrentDirectory
-        }
         Write-Host 'Select directory with files to decompress';
 
         $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
@@ -31,9 +26,9 @@ try
             Write-Host "Directory selected is $InputPath"
         }
     }
-    else
+    if (-Not (Test-Path ".\Extracted")) 
     {
-        $cpath = $pwd;
+        New-Item -Path ".\" -Name "Extracted" -ItemType Directory -Force
     }
     $Files = Get-ChildItem $InputPath
     ForEach ($File in $Files)
@@ -54,7 +49,7 @@ try
 
     if (-Not (Test-Path ".\Decoded")) 
     {
-        New-Item -Path ".\" -Name "Decoded" -ItemType Directory
+        New-Item -Path ".\" -Name "Decoded" -ItemType Directory -Force
     }
 
 
